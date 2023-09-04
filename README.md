@@ -1,6 +1,7 @@
 # flutter_test1
 
 A new Flutter project.
+Flutter 테스트 앱. 여러 개발환경에서 하나의 코드베이스로 빌드 테스트.
 
 ## Getting Started
 
