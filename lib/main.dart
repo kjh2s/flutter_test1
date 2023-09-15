@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_libserialport/flutter_libserialport.dart';
 
 void main() {
   runApp(MyApp());
@@ -34,6 +35,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  SerialPort _serialPort = new SerialPort("/dev/ttyUSB0");
+  List _availablePorts = SerialPort.availablePorts;
 
   void _incrementCounter() {
     setState(() {
@@ -46,6 +49,10 @@ class _MyHomePageState extends State<MyHomePage> {
       if(_counter>0)
         _counter--;
     });
+  }
+  
+  void _serialConnect(){
+    _serialPort.open(mode: SerialPortMode.readWrite);
   }
 
   @override
@@ -74,6 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
               margin: EdgeInsets.all(10),
               width: 200,
               height: 100,
+              child: Text(
+                '$_availablePorts'
+              ),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.lightGreenAccent,
@@ -99,6 +109,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 ]
               ),
             ),
+            OutlinedButton(onPressed: _serialConnect,
+                child: Text("Connect"),),
+            Row(
+              children: <Widget>[
+                Container(
+                  color: Colors.green.withOpacity(0.3),
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  height: 100,
+                  padding: EdgeInsets.all(5.0),
+                  margin: EdgeInsets.all(5.0),
+                ),
+                Spacer(),
+                Container(
+                  color: Colors.green.withOpacity(0.7),
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  height: 100,
+                  padding: EdgeInsets.all(5.0),
+                  margin: EdgeInsets.all(5.0),
+                )
+              ],
+            )
           ],
         ),
       ),
