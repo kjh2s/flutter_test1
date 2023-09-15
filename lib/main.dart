@@ -6,9 +6,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}): super(key: key){
-    print("MyApp() constructor");
-  }
+  MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +33,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  SerialPort _serialPort = new SerialPort("/dev/ttyUSB0");
   List _availablePorts = SerialPort.availablePorts;
+  SerialPort _serialPort = new SerialPort(SerialPort.availablePorts.first);
+  String _connectButtonStr = "Connect";
 
   void _incrementCounter() {
     setState(() {
@@ -52,7 +51,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   void _serialConnect(){
-    _serialPort.open(mode: SerialPortMode.readWrite);
+    setState(() {
+      if(!_serialPort.isOpen){
+        _serialPort.openReadWrite();
+      }
+      if(_serialPort.isOpen)
+        _connectButtonStr = "Connected";
+      else
+        _connectButtonStr = "Connect";
+    });
   }
 
   @override
@@ -110,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             OutlinedButton(onPressed: _serialConnect,
-                child: Text("Connect"),),
+                child: Text('$_connectButtonStr')),
             Row(
               children: <Widget>[
                 Container(
