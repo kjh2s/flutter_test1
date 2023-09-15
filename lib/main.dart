@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_libserialport/flutter_libserialport.dart';
+//import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:libserialport/libserialport.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,9 +34,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
   List _availablePorts = SerialPort.availablePorts;
   SerialPort _serialPort = new SerialPort(SerialPort.availablePorts.first);
   String _connectButtonStr = "Connect";
+  String _disconnectButtonStr = "Disconnect";
 
   void _incrementCounter() {
     setState(() {
@@ -59,6 +62,18 @@ class _MyHomePageState extends State<MyHomePage> {
         _connectButtonStr = "Connected";
       else
         _connectButtonStr = "Connect";
+    });
+  }
+
+  void _serialDisconnect(){
+    setState(() {
+      if(_serialPort.isOpen){
+        _serialPort.dispose();
+      }
+      if(_serialPort.isOpen)
+        _disconnectButtonStr = "Disconnect";
+      else
+        _disconnectButtonStr = "Disconnected";
     });
   }
 
@@ -118,6 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             OutlinedButton(onPressed: _serialConnect,
                 child: Text('$_connectButtonStr')),
+            OutlinedButton(onPressed: _serialDisconnect,
+                child: Text('$_disconnectButtonStr')),
             Row(
               children: <Widget>[
                 Container(
