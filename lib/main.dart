@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -36,7 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   List<String> _portsList = SerialPort.availablePorts;
-  SerialPort _serialPort = new SerialPort(SerialPort.availablePorts.first);   //가능 포트가 없으면? null이 아니고 빈 List 반환됨.
+  SerialPort _serialPort = new SerialPort(SerialPort.availablePorts[0]);   //가능 포트가 없으면? null이 아니고 빈 List 반환됨.
   String _connectButtonStr = "Connect";
   String _disconnectButtonStr = "Disconnect";
   List<Uint8List> receivedData = [];
@@ -59,7 +60,19 @@ class _MyHomePageState extends State<MyHomePage> {
   
   void _serialConnect(){
     if(!_serialPort.isOpen){
-      _serialPort = SerialPort(_portsList.first);
+      if(Platform.isWindows){
+        _serialPort = new SerialPort(_portsList[0]);
+      }
+      else if(Platform.isLinux){
+        String port_name = "";
+        for(String str in _portsList){
+          if(str.contains("USB")){
+            port_name = str;
+            break;
+          }
+        }
+        _serialPort = new SerialPort(port_name);
+      }
       _serialPort.openReadWrite();
       setState(() {
         _connectButtonStr = "Connected";
@@ -165,8 +178,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 500,
                   padding: EdgeInsets.all(5.0),
                   margin: EdgeInsets.all(5.0),
-                  child: Text(
-                    '$sendStr'
+                  child: SingleChildScrollView(
+                    child: Text(
+                        '$sendStr'
+                    ),
                   ),
                 ),
                 Spacer(),
@@ -176,10 +191,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 500,
                   padding: EdgeInsets.all(5.0),
                   margin: EdgeInsets.all(5.0),
-                  child: Text(
-                    '$receivedStr'
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Text(
+                          '$receivedStr'
+                      ),
                   ),
-                )
+                ),
               ],
             )
           ],
