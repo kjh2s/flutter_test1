@@ -1,13 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-//import 'package:flutter_libserialport/flutter_libserialport.dart';
-import 'package:libserialport/libserialport.dart';
+import 'package:flutter_libserialport/flutter_libserialport.dart';
+//import 'package:libserialport/libserialport.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +35,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
-  List _availablePorts = SerialPort.availablePorts;
-  SerialPort _serialPort = new SerialPort(SerialPort.availablePorts.first);
+  List<String> _portsList = SerialPort.availablePorts;
+  SerialPort _serialPort = new SerialPort(SerialPort.availablePorts.first);   //가능 포트가 없으면? null이 아니고 빈 List 반환됨.
   String _connectButtonStr = "Connect";
   String _disconnectButtonStr = "Disconnect";
+  List<Uint8List> receivedData = [];
+  String sendStr = "";
+  String receivedStr = "";
+
 
   void _incrementCounter() {
     setState(() {
@@ -54,28 +58,46 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   
   void _serialConnect(){
-    setState(() {
-      if(!_serialPort.isOpen){
-        _serialPort.openReadWrite();
-      }
-      if(_serialPort.isOpen)
+    if(!_serialPort.isOpen){
+      _serialPort = SerialPort(_portsList.first);
+      _serialPort.openReadWrite();
+      setState(() {
         _connectButtonStr = "Connected";
-      else
-        _connectButtonStr = "Connect";
-    });
+        _disconnectButtonStr = "Disconnect";
+      });
+      List<int> int_list_send = "l,,;".codeUnits;
+      _serialPort.write(Uint8List.fromList(int_list_send));
+      //_serialPort.write("l,,;");
+
+      setState(() {
+        sendStr = "l,,;";
+      });
+
+      receivedData.add(_serialPort.read(200,timeout: 3000));
+      setState(() {
+        //receivedStr = receivedData[receivedData.length-1].toString();
+        receivedStr = new String.fromCharCodes(receivedData[receivedData.length-1]);
+      });
+    }
   }
 
   void _serialDisconnect(){
-    setState(() {
-      if(_serialPort.isOpen){
-        _serialPort.dispose();
-      }
-      if(_serialPort.isOpen)
-        _disconnectButtonStr = "Disconnect";
-      else
+    if(_serialPort.isOpen){
+      _serialPort.close();
+      setState(() {
         _disconnectButtonStr = "Disconnected";
-    });
+        _connectButtonStr = "Connect";
+        sendStr = "";
+        receivedStr = "";
+      });
+    }
   }
+
+  /*Future<void> readSerialFuture() async{
+    if(_serialPort != null){
+      SerialPortReader reader = SerialPortReader(_serialPort);
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
               width: 200,
               height: 100,
               child: Text(
-                '$_availablePorts'
+                '$_portsList'
               ),
               decoration: BoxDecoration(
                 border: Border.all(
@@ -140,17 +162,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   color: Colors.green.withOpacity(0.3),
                   width: MediaQuery.of(context).size.width * 0.4,
-                  height: 100,
+                  height: 500,
                   padding: EdgeInsets.all(5.0),
                   margin: EdgeInsets.all(5.0),
+                  child: Text(
+                    '$sendStr'
+                  ),
                 ),
                 Spacer(),
                 Container(
                   color: Colors.green.withOpacity(0.7),
                   width: MediaQuery.of(context).size.width * 0.4,
-                  height: 100,
+                  height: 500,
                   padding: EdgeInsets.all(5.0),
                   margin: EdgeInsets.all(5.0),
+                  child: Text(
+                    '$receivedStr'
+                  ),
                 )
               ],
             )
