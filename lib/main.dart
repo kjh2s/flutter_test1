@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 //import 'package:libserialport/libserialport.dart';
+import 'db_helper.dart';
+import 'model_stock.dart';
 
 void main() {
   runApp(MyApp());
@@ -216,8 +218,104 @@ class _MyHomePageState extends State<MyHomePage> {
             tooltip: 'Decrement',
             child: const Icon(Icons.remove),
           ),
+          SizedBox(width: 50),
+          FloatingActionButton(
+              onPressed: () {
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const SecondPage()),
+                );
+              },
+            child: const Icon(Icons.arrow_forward),
+          )
         ],
       )
+    );
+  }
+}
+
+class SecondPage extends StatefulWidget {
+  const SecondPage({super.key});
+
+  @override
+  State<SecondPage> createState() => _SecondPageState();
+}
+
+class _SecondPageState extends State<SecondPage> {
+
+  String _str_dblist = "";
+  DBHelper _dbHelper = DBHelper();
+
+  void _ReadAllDB() async{
+
+    List<Stock> stock_list = await _dbHelper.all_stocks();
+
+
+    String str_dblist = "ticker  |   price  \n";
+    for(Stock stck in stock_list){
+      str_dblist += stck.ticker;
+      str_dblist += "  | ";
+      str_dblist += stck.price.toString();
+      str_dblist += "\n";
+    }
+    setState(() {
+      _str_dblist = str_dblist;
+    });
+  }
+
+  void _ClearText(){
+    setState(() {
+      _str_dblist = "clear";
+    });
+  }
+
+  void _InsertDB() async{
+    Stock st1 = Stock('AAPL', 180);
+    Stock st2 = Stock('MSFT', 330);
+    Stock st3 = Stock('V', 240);
+
+    await DBHelper().insertStock(st1);
+    await DBHelper().insertStock(st2);
+    await DBHelper().insertStock(st3);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Second Page"),
+        ),
+      body: Center(
+        child: Row(
+          children: [
+            Container(
+              color: Colors.blue.withOpacity(0.3),
+              width: MediaQuery.of(context).size.width * 0.4,
+              height: 500,
+              padding: EdgeInsets.all(5.0),
+              margin: EdgeInsets.all(5.0),
+              child: SingleChildScrollView(
+                child: Text(
+                    'CRUD'
+                ),
+              ),
+            ),
+            Spacer(),
+            OutlinedButton(onPressed: _ReadAllDB, child: Text("read all db")),
+            OutlinedButton(onPressed: _ClearText, child: Text("clear text")),
+            OutlinedButton(onPressed: _InsertDB, child: Text("Insert DB")),
+            Container(
+              color: Colors.green.withOpacity(0.3),
+              width: MediaQuery.of(context).size.width * 0.4,
+              height: 500,
+              padding: EdgeInsets.all(5.0),
+              margin: EdgeInsets.all(5.0),
+              child: SingleChildScrollView(
+                child: Text('$_str_dblist')
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
