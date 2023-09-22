@@ -23,10 +23,15 @@ class DBHelper{
 
   Future<Database> _initDatabase() async{
     sqfliteFfiInit();
-    var db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
-    await db.execute(
-      "Create Table $TableName(stock_ticker TEXT PRIMARY Key, stock_price REAL)",
-    );
+    //var db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+    var db = await databaseFactoryFfi.openDatabase('testdb.db');   //요렇게 하면 (윈도우)Release 폴더 안에 .dart_tool 폴더 안에 db파일 생성됨.(있으면 그냥 여나?)
+
+    if(await db.query('sqlite_master', where: 'name=?', whereArgs: [TableName]) == []){
+      await db.execute(
+        "Create Table $TableName(stock_ticker TEXT PRIMARY Key, stock_price REAL)",
+      );
+    }
+
     return db;
 
     /*Directory documentsDirectory = await getApplicationDocumentsDirectory();
@@ -45,6 +50,8 @@ class DBHelper{
     await db.insert(TableName,
         {'stock_ticker': stock.ticker,
       'stock_price':stock.price}, conflictAlgorithm: ConflictAlgorithm.replace);
+
+
   }
 
   Future<List<Stock>> all_stocks() async{
