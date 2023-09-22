@@ -24,13 +24,20 @@ class DBHelper{
   Future<Database> _initDatabase() async{
     sqfliteFfiInit();
     //var db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
-    var db = await databaseFactoryFfi.openDatabase('testdb.db');   //요렇게 하면 (윈도우)Release 폴더 안에 .dart_tool 폴더 안에 db파일 생성됨.(있으면 그냥 여나?)
+    Database db = await databaseFactoryFfi.openDatabase('testdb.db');   //요렇게 하면 (윈도우)Release 폴더 안에 .dart_tool 폴더 안에 db파일 생성됨.
 
-    if(await db.query('sqlite_master', where: 'name=?', whereArgs: [TableName]) == []){
+    /*Directory docDirectory = await getApplicationDocumentsDirectory();  //getApplicationDocumentsDirectory()는 윈도우,리눅스에선 안되는듯.
+    String path = join(docDirectory.path, 'testdb.db');
+    var db = await databaseFactoryFfi.openDatabase(path);*/
+
+    /*if(await db.query('sqlite_master', where: 'name=?', whereArgs: [TableName]) == []){
       await db.execute(
         "Create Table $TableName(stock_ticker TEXT PRIMARY Key, stock_price REAL)",
       );
-    }
+    }*/
+    await db.execute(
+      "Create Table if not exists $TableName(stock_ticker TEXT PRIMARY Key, stock_price REAL)",
+    );
 
     return db;
 
@@ -54,10 +61,18 @@ class DBHelper{
 
   }
 
+  Future<Stock> readStock(String str_pk) async{
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.query(TableName, where: 'stock_ticker = ?', whereArgs: [str_pk]);
+    Stock stc = Stock(maps.first['stock_ticker'], maps.first['stock_price']);
+    return stc;
+  }
+
   Future<List<Stock>> all_stocks() async{
     final db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query('Stocks');
+    final List<Map<String, dynamic>> maps = await db.query(TableName);
 
     return List.generate(maps.length, (i){
       return Stock(maps[i]['stock_ticker'],

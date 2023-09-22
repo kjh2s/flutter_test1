@@ -123,87 +123,91 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: Icon(Icons.account_balance),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              '텍스트 한글 테스트:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            Text(
-                'aaa'
-            ),
-            Container(
-              margin: EdgeInsets.all(10),
-              width: 200,
-              height: 100,
-              child: Text(
-                '$_portsList'
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                '텍스트 한글 테스트:',
               ),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.lightGreenAccent,
-                  width: 10,
-                  style: BorderStyle.solid,
-                  strokeAlign: BorderSide.strokeAlignInside,
-                ),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30),
-                  topLeft: Radius.circular(30),
-                  bottomLeft: Radius.circular(30),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.purple, Colors.white],
-                ),
-                boxShadow: [
-                  BoxShadow(color: Colors.grey,
-                  spreadRadius: 4.0,
-                  blurRadius: 5.0,
-                  blurStyle: BlurStyle.normal),
-                ]
+              Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
-            ),
-            OutlinedButton(onPressed: _serialConnect,
-                child: Text('$_connectButtonStr')),
-            OutlinedButton(onPressed: _serialDisconnect,
-                child: Text('$_disconnectButtonStr')),
-            Row(
-              children: <Widget>[
-                Container(
-                  color: Colors.green.withOpacity(0.3),
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  height: 500,
-                  padding: EdgeInsets.all(5.0),
-                  margin: EdgeInsets.all(5.0),
-                  child: SingleChildScrollView(
-                    child: Text(
-                        '$sendStr'
+              Text(
+                  'aaa'
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                width: 200,
+                height: 100,
+                child: Text(
+                    '$_portsList'
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.lightGreenAccent,
+                      width: 10,
+                      style: BorderStyle.solid,
+                      strokeAlign: BorderSide.strokeAlignInside,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(30),
+                      topLeft: Radius.circular(30),
+                      bottomLeft: Radius.circular(30),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.purple, Colors.white],
+                    ),
+                    boxShadow: [
+                      BoxShadow(color: Colors.grey,
+                          spreadRadius: 4.0,
+                          blurRadius: 5.0,
+                          blurStyle: BlurStyle.normal),
+                    ]
+                ),
+              ),
+              OutlinedButton(onPressed: _serialConnect,
+                  child: Text('$_connectButtonStr')),
+              OutlinedButton(onPressed: _serialDisconnect,
+                  child: Text('$_disconnectButtonStr')),
+              Row(
+                children: <Widget>[
+                  Container(
+                    color: Colors.green.withOpacity(0.3),
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 500,
+                    padding: EdgeInsets.all(5.0),
+                    margin: EdgeInsets.all(5.0),
+                    child: SingleChildScrollView(
+                      child: Text(
+                          '$sendStr'
+                      ),
                     ),
                   ),
-                ),
-                Spacer(),
-                Container(
-                  color: Colors.green.withOpacity(0.7),
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  height: 500,
-                  padding: EdgeInsets.all(5.0),
-                  margin: EdgeInsets.all(5.0),
-                  child: SingleChildScrollView(
+                  Spacer(),
+                  Container(
+                    color: Colors.green.withOpacity(0.7),
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 500,
+                    padding: EdgeInsets.all(5.0),
+                    margin: EdgeInsets.all(5.0),
+                    child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: Text(
                           '$receivedStr'
                       ),
+                    ),
                   ),
-                ),
-              ],
-            )
-          ],
-        ),
+                ],
+              )
+            ],
+          ),
+        )
       ),
       floatingActionButton: Row(
         children: [
@@ -244,11 +248,18 @@ class _SecondPageState extends State<SecondPage> {
 
   String _str_dblist = "";
   DBHelper _dbHelper = DBHelper();
+  final _tickerTextCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _dbHelper = DBHelper();
+  }
 
   void _ReadAllDB() async{
 
     List<Stock> stock_list = await _dbHelper.all_stocks();
-
 
     String str_dblist = "ticker  |   price  \n";
     for(Stock stck in stock_list){
@@ -273,9 +284,21 @@ class _SecondPageState extends State<SecondPage> {
     Stock st2 = Stock('MSFT', 330);
     Stock st3 = Stock('V', 240);
 
-    await DBHelper().insertStock(st1);
-    await DBHelper().insertStock(st2);
-    await DBHelper().insertStock(st3);
+    await _dbHelper.insertStock(st1);
+    await _dbHelper.insertStock(st2);
+    await _dbHelper.insertStock(st3);
+  }
+
+  void _ReadDB() async{
+    Stock st1 = await _dbHelper.readStock(_tickerTextCtrl.text);
+    String str_dblist = "ticker  |   price  \n";
+    str_dblist += st1.ticker;
+    str_dblist += "  | ";
+    str_dblist += st1.price.toString();
+    str_dblist += "\n";
+    setState(() {
+      _str_dblist = str_dblist;
+    });
   }
 
   @override
@@ -293,16 +316,33 @@ class _SecondPageState extends State<SecondPage> {
               height: 500,
               padding: EdgeInsets.all(5.0),
               margin: EdgeInsets.all(5.0),
-              child: SingleChildScrollView(
-                child: Text(
-                    'CRUD'
-                ),
-              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text("PK:  "),
+                      TextField(
+                        controller: _tickerTextCtrl,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text("2  "),
+                      TextField(),
+                    ],
+                  )
+                ],
+              )
             ),
-            Spacer(),
-            OutlinedButton(onPressed: _ReadAllDB, child: Text("read all db")),
-            OutlinedButton(onPressed: _ClearText, child: Text("clear text")),
-            OutlinedButton(onPressed: _InsertDB, child: Text("Insert DB")),
+            Column(
+              children: [
+                OutlinedButton(onPressed: _ReadAllDB, child: Text("read all db")),
+                OutlinedButton(onPressed: _ClearText, child: Text("clear text")),
+                OutlinedButton(onPressed: _InsertDB, child: Text("Insert DB")),
+                OutlinedButton(onPressed: _ReadDB, child: Text("read 'ticker' item")),
+              ],
+            ),
             Container(
               color: Colors.green.withOpacity(0.3),
               width: MediaQuery.of(context).size.width * 0.4,
