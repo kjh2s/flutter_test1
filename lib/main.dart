@@ -21,8 +21,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
+        //fontFamily: 'Sans-serif'
+        fontFamily: 'NanumGothic',
       ),
       home: const MyHomePage(title: '타이틀 한글 테스트 상태 전달...'),
+      //home: const SecondPage(),
     );
   }
 }
@@ -249,6 +252,7 @@ class _SecondPageState extends State<SecondPage> {
   String _str_dblist = "";
   DBHelper _dbHelper = DBHelper();
   final _tickerTextCtrl = TextEditingController();
+  final _priceTextCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -279,7 +283,7 @@ class _SecondPageState extends State<SecondPage> {
     });
   }
 
-  void _InsertDB() async{
+  void _InsertDB_custom() async{
     Stock st1 = Stock('AAPL', 180);
     Stock st2 = Stock('MSFT', 330);
     Stock st3 = Stock('V', 240);
@@ -287,6 +291,17 @@ class _SecondPageState extends State<SecondPage> {
     await _dbHelper.insertStock(st1);
     await _dbHelper.insertStock(st2);
     await _dbHelper.insertStock(st3);
+  }
+
+  void _InsertDB() async{
+    Stock st1 = Stock(_tickerTextCtrl.text, double.parse(_priceTextCtrl.text));
+
+    await _dbHelper.insertStock(st1);
+    showDialog(context: context, builder: (BuildContext ctx){
+      return AlertDialog(
+        content: Text("insert: " + st1.ticker),
+      );
+    });
   }
 
   void _ReadDB() async{
@@ -320,7 +335,7 @@ class _SecondPageState extends State<SecondPage> {
                 children: [
                   Row(
                     children: [
-                      Text("PK:  "),
+                      Text("PK(ticker):  "),
                       TextField(
                         controller: _tickerTextCtrl,
                       ),
@@ -328,8 +343,10 @@ class _SecondPageState extends State<SecondPage> {
                   ),
                   Row(
                     children: [
-                      Text("2  "),
-                      TextField(),
+                      Text("price:  "),
+                      TextField(
+                        controller: _priceTextCtrl,
+                      ),
                     ],
                   )
                 ],
@@ -339,8 +356,9 @@ class _SecondPageState extends State<SecondPage> {
               children: [
                 OutlinedButton(onPressed: _ReadAllDB, child: Text("read all db")),
                 OutlinedButton(onPressed: _ClearText, child: Text("clear text")),
-                OutlinedButton(onPressed: _InsertDB, child: Text("Insert DB")),
+                OutlinedButton(onPressed: _InsertDB_custom, child: Text("Insert DB custom")),
                 OutlinedButton(onPressed: _ReadDB, child: Text("read 'ticker' item")),
+                OutlinedButton(onPressed: _InsertDB, child: Text("create item")),
               ],
             ),
             Container(

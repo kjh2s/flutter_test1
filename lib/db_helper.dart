@@ -57,9 +57,8 @@ class DBHelper{
     await db.insert(TableName,
         {'stock_ticker': stock.ticker,
       'stock_price':stock.price}, conflictAlgorithm: ConflictAlgorithm.replace);
-
-
   }
+
 
   Future<Stock> readStock(String str_pk) async{
     final db = await database;
