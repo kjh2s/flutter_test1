@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
@@ -77,6 +78,24 @@ class DBHelper{
       return Stock(maps[i]['stock_ticker'],
           maps[i]['stock_price']);
     });
+  }
+
+  void updateStock(Stock src, Stock dst) async{
+    final db = await database;
+
+    db.update(TableName, dst.toMap(), where: 'stock_ticker = ?', whereArgs: [src.ticker]);
+  }
+
+  Future<int> deleteStock(String str_pk) async{
+    final db = await database;
+
+    return db.delete(TableName, where: 'stock_ticker = ?', whereArgs: [str_pk]);
+  }
+
+  Future<int> deleteTableStock() async{
+    final db = await database;
+
+    return db.rawDelete("Delete from $TableName");
   }
 }
 

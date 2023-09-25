@@ -304,12 +304,59 @@ class _SecondPageState extends State<SecondPage> {
     });
   }
 
+  void _DeleteDB() async{
+    String str_pk = _tickerTextCtrl.text;
+
+    int deleted_cnt = await _dbHelper.deleteStock(str_pk);
+
+    if(deleted_cnt != 0){
+      showDialog(context: context, builder: (BuildContext ctx){
+        return AlertDialog(
+          content: Text("deleted: " + str_pk),
+        );
+      });
+    }
+  }
+
+  void _DeleteTable() async{
+    int deleted_cnt = await _dbHelper.deleteTableStock();
+
+    if(deleted_cnt != 0){
+      showDialog(context: context, builder: (BuildContext ctx){
+        return AlertDialog(
+          content: Text("Deleted Table"),
+        );
+      });
+    }
+  }
+
   void _ReadDB() async{
     Stock st1 = await _dbHelper.readStock(_tickerTextCtrl.text);
     String str_dblist = "ticker  |   price  \n";
     str_dblist += st1.ticker;
     str_dblist += "  | ";
     str_dblist += st1.price.toString();
+    str_dblist += "\n";
+    setState(() {
+      _str_dblist = str_dblist;
+    });
+  }
+
+  void _UpdateDB() async{
+    Stock src = await _dbHelper.readStock(_tickerTextCtrl.text);
+    Stock dst = Stock(_tickerTextCtrl.text, double.parse(_priceTextCtrl.text));
+    _dbHelper.updateStock(src, dst);
+
+    showDialog(context: context, builder: (BuildContext ctx){
+      return AlertDialog(
+        content: Text("update: " + dst.ticker),
+      );
+    });
+
+    String str_dblist = "ticker  |   price  \n";
+    str_dblist += dst.ticker;
+    str_dblist += "  | ";
+    str_dblist += dst.price.toString();
     str_dblist += "\n";
     setState(() {
       _str_dblist = str_dblist;
@@ -359,6 +406,9 @@ class _SecondPageState extends State<SecondPage> {
                 OutlinedButton(onPressed: _InsertDB_custom, child: Text("Insert DB custom")),
                 OutlinedButton(onPressed: _ReadDB, child: Text("read 'ticker' item")),
                 OutlinedButton(onPressed: _InsertDB, child: Text("create item")),
+                OutlinedButton(onPressed: _UpdateDB, child: Text("update item")),
+                OutlinedButton(onPressed: _DeleteDB, child: Text("delete item")),
+                OutlinedButton(onPressed: _DeleteTable, child: Text("delete table")),
               ],
             ),
             Container(
