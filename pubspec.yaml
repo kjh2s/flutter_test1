@@ -17,6 +17,7 @@ dependencies:
   #libserialport: ^0.3.0+1
   flutter_libserialport: ^0.3.0
   sqflite_common_ffi: ^2.3.0+2
+  provider: ^6.1.1
   #flutter_libserialport: ^0.3.0
 
 
