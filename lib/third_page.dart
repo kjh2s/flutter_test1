@@ -30,27 +30,36 @@ class _ThirdPageState extends State<ThirdPage> {
 class ThirdPage extends StatelessWidget{
   ThirdPage({super.key});
   CountViewModel _countViewModel = CountViewModel();
-  ListView lv = ListView();
+  Widget lv = ListView();
 
   @override
   Widget build(BuildContext context){
     lv = _countList(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Third Page: Provider, Undo/Redo Test"),
+        title: Text("Third Page: MVVM Test"),
       ),
       body: Center(
         child: Row(
           children: [
+            SizedBox(width: 100),
             ChangeNotifierProvider(
-              create: (context) => CountViewModel(),
-              child: lv,
+              create: (context) => _countViewModel,  //여기서 CountViewModel()로 객체 생성하면 위에 필드 정의에서 생성된 객체랑 다른거니까 count 변해도 적용 안되었던 것.
+              child: Consumer<CountViewModel>(
+                builder: (context, provider, child){
+                  return Text(provider.count.toString(),
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: [Colors.red, Colors.orange, Colors.yellow, Colors.green, Colors.blue, Colors.indigo, Colors.purple][provider.count - 1]
+                    ),
+                  );
+                },
+              ),
             ),
-            Text((_countViewModel.count).toString()),
+            SizedBox(width: 100),
+            lv,
           ],
         )
-          //child: Text("...")
-        //child: _countList(context),
       ),
       floatingActionButton: Row(
         children: [
@@ -70,15 +79,33 @@ class ThirdPage extends StatelessWidget{
     );
   }
 
-  ListView _countList(BuildContext context){
-    return ListView.builder(
-      itemCount: _countViewModel.count,
-      itemBuilder: (context, index){
-        return Container(
-          height: 20,
-          child: Text(_countViewModel.textList[index]),
-        );
-      },
+  Widget _countList(BuildContext context){
+    return ChangeNotifierProvider(
+      create: (context) => _countViewModel,  //여기서 CountViewModel()로 객체 생성하면 위에 필드 정의에서 생성된 객체랑 다른거니까 count 변해도 적용 안되었던 것.
+      child: Consumer<CountViewModel>(
+        builder: (context, provider, child){
+          return ListView.builder(
+            itemCount: provider.count,
+            itemBuilder: (context, index){
+              return Container(
+                  height: 30,
+                  child: Text(provider.textList[index],
+                  style: TextStyle(
+                    fontSize: 10 + index * 4,
+                    fontWeight: ((){
+                      if(index < 4){
+                        return FontWeight.normal;
+                      }
+                      else{
+                        return FontWeight.bold;
+                      }
+                    })(),
+                  ))
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
